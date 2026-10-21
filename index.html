@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>寻宝游戏</title>
+    <style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    background-color:#1c1f2b;
+    color:#fff;
+    font-family:微软雅黑;
+    padding:40px;
+}
+.container{
+    max-width:700px;
+    margin:0 auto;
+}
+h1{
+    color:#ffd700;
+    margin-bottom:20px;
+}
+#logBox{
+    background:#2b3044;
+    min-height:350px;
+    padding:20px;
+    border-radius:10px;
+    margin-top:20px;
+    line-height:2;
+}
+.log-item{
+    opacity:0;
+    transform:translateY(10px);
+    transition:all 0.5s ease;
+}
+.log-item.show{
+    opacity:1;
+    transform:translateY(0);
+}
+.error-text{
+    color:#ff6b6b;
+}
+.success-text{
+    color:#72e089;
+}
+button{
+    padding:10px 22px;
+    font-size:16px;
+    background:#ffad00;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+button:disabled{
+    background:#555;
+    cursor:not-allowed;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏺神庙寻宝大冒险</h1>
+        <button id="startBtn">开始寻宝</button>
+        <div id="logBox"></div>
+    </div>
+
+<script>
+class TreasureMap {
+    static getInitialClue() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("在古老的图书馆里找到了第一个线索...");
+        }, 1000);
+      });
+    }
+  
+    static decodeAncientScript(clue) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (!clue) {
+            reject("没有线索可以解码!");
+          }
+          resolve("解码成功!宝藏在一座古老的神庙中...");
+        }, 1500);
+      });
+    }
+  
+    static searchTemple(location) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const random = Math.random();
+          if (random < 0.5) {
+            reject("糟糕!遇到了神庙守卫!");
+          }
+          resolve("找到了一个神秘的箱子...");
+        }, 2000);
+      });
+    }
+    //新增寻宝情节
+    static solvePuzzle(boxInfo) {
+        return new Promise((resolve, reject) => {
+            setTimeout(()=>{
+                const r = Math.random();
+                if(r < 0.3){
+                    reject("机关谜题破解失败，箱子被锁住无法打开！");
+                }else{
+                    resolve("谜题破解成功！箱子的锁已经解除");
+                }
+            },1400)
+        })
+    }
+  
+    static openTreasureBox() {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("恭喜!你找到了传说中的宝藏!");
+        }, 1000);
+      });
+    }
+  }
+
+const logBox = document.querySelector("#logBox");
+const startBtn = document.querySelector("#startBtn");
+
+function sleep(ms){
+    return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+async function addLog(text, isError=false, isSuccess=false){
+    const div = document.createElement('div');
+    div.className = "log-item";
+    div.textContent = text;
+    if(isError) div.classList.add("error-text");
+    if(isSuccess) div.classList.add("success-text");
+    logBox.appendChild(div);
+    await sleep(30);
+    div.classList.add("show");
+}
+
+async function findTreasureWithAsyncAwait() {
+    startBtn.disabled = true;
+    logBox.innerHTML = "";
+    try {
+        await addLog("==== 寻宝冒险启动 ====");
+        const clue = await TreasureMap.getInitialClue();
+        await addLog(clue);
+        const location = await TreasureMap.decodeAncientScript(clue);
+        await addLog(location);
+        const box = await TreasureMap.searchTemple(location);
+        await addLog(box);
+        const puzzleResult = await TreasureMap.solvePuzzle(box);
+        await addLog(puzzleResult);
+        const treasure = await TreasureMap.openTreasureBox();
+        await addLog(treasure, false, true);
+    } catch (err) {
+        await addLog(`任务失败：${err}`, true);
+    }finally{
+        startBtn.disabled = false;
+    }
+}
+
+startBtn.addEventListener("click", findTreasureWithAsyncAwait);
+</script>
+</body>
+</html>
